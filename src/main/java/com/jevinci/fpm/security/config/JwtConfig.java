@@ -1,4 +1,4 @@
-package com.jevinci.fpm.security.jwt;
+package com.jevinci.fpm.security.config;
 
 import com.auth0.jwt.algorithms.Algorithm;
 
@@ -14,7 +14,9 @@ public class JwtConfig {
 
     public static String TOKEN_KEY = "jevinci1209";
 
-    public static Long EXPIRES_LIMIT = 3 * 1L;
+    public static Long EXPIRES_LIMIT = 1 * 1L;
+
+    public static Long REFRESH_EXPIRES_LIMIT = 7 * 1L;
 
     public static Algorithm getAlgorithm() {
         try {

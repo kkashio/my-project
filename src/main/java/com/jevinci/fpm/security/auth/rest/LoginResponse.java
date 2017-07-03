@@ -1,9 +1,10 @@
-package com.jevinci.fpm.dto;
+package com.jevinci.fpm.security.auth.rest;
 
 import com.jevinci.fpm.domain.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.Map;
 
@@ -13,7 +14,7 @@ import java.util.Map;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class SocialLoginResponseDTO {
+public class LoginResponse {
     private String resultCode;
     private String message;
     private User user;

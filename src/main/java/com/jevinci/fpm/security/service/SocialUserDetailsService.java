@@ -29,6 +29,6 @@ public class SocialUserDetailsService implements UserDetailsService {
             throw new UsernameNotFoundException("user is not joined");
         }
 
-        return new UserDetailsImpl(user, AuthorityUtils.createAuthorityList(user.getRoles()));
+        return null;
     }
 }

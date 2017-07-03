@@ -1,8 +1,6 @@
-package com.jevinci.fpm.security.provider;
+package com.jevinci.fpm.security.auth.jwt;
 
-import com.jevinci.fpm.domain.User;
 import com.jevinci.fpm.security.impl.UserDetailsImpl;
-import com.jevinci.fpm.security.jwt.JwtAuthenticationToken;
 import com.jevinci.fpm.security.service.JwtUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -22,9 +20,9 @@ public class JwtAuthenticationProvider implements AuthenticationProvider{
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-        String userId = ((User) authentication.getPrincipal()).getId();
-        UserDetailsImpl user = userDetailsService.loadUserByUsername(userId);
-        return new JwtAuthenticationToken(user.getUser(), user.getAuthorities());
+        String token = (String) authentication.getCredentials();
+        UserDetailsImpl user = userDetailsService.loadUserByUsername(token);
+        return new JwtAuthenticationToken(user, user.getAuthorities());
     }
 
     @Override

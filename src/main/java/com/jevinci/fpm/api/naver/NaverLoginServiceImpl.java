@@ -2,7 +2,7 @@ package com.jevinci.fpm.api.naver;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jevinci.fpm.domain.User;
-import com.jevinci.fpm.dto.SocialLoginResponseDTO;
+import com.jevinci.fpm.security.auth.rest.LoginResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,7 +11,9 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Created by seongmin Park on 2017. 6. 27..
@@ -25,8 +27,8 @@ public class NaverLoginServiceImpl implements NaverLoginService{
     ObjectMapper objectMapper;
 
     @Override
-    public SocialLoginResponseDTO getProfile(String accessToken){
-        SocialLoginResponseDTO socialLoginResponseDTO = null;
+    public LoginResponse getProfile(String accessToken){
+        LoginResponse loginResponse = null;
         User user = new User();
         String header = "Bearer " + accessToken; // Bearer 다음에 공백 추가
         try {
@@ -41,6 +43,7 @@ public class NaverLoginServiceImpl implements NaverLoginService{
                 br = new BufferedReader(new InputStreamReader(con.getInputStream()));
             } else {  // 에러 발생
                 br = new BufferedReader(new InputStreamReader(con.getErrorStream()));
+                return null;
             }
             String inputLine;
             StringBuffer response = new StringBuffer();
@@ -50,16 +53,19 @@ public class NaverLoginServiceImpl implements NaverLoginService{
             br.close();
 
             LinkedHashMap<String, Object> result = objectMapper.readValue(response.toString(), LinkedHashMap.class);
+            HashMap data = (HashMap) result.get("response");
 
-            if(result.get("resultcode").equals("00")) {
-                user.setNaverProfile((LinkedHashMap) result.get("response"));
-            }
-            socialLoginResponseDTO = new SocialLoginResponseDTO(result.get("resultcode").toString(), "NAVER API "+result.get("message").toString(), user);
+            user.setEmail(data.get("email").toString());
+            user.setSocialId(data.get("id").toString());
+
+            log.info("Request NAVER user profile : " + result);
+            return new LoginResponse(result.get("resultcode").toString(), "NAVER API "+result.get("message").toString(), user);
+
         } catch (Exception e) {
             e.printStackTrace();
         }
-        log.info("Request NAVER user profile : " + user);
 
-        return socialLoginResponseDTO;
+
+        return null;
     }
 }

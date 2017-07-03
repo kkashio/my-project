@@ -1,18 +1,18 @@
 package com.jevinci.fpm.security.service;
 
 import com.auth0.jwt.JWT;
-import com.jevinci.fpm.domain.User;
-import com.jevinci.fpm.repository.UserRepository;
 import com.jevinci.fpm.security.impl.UserDetailsImpl;
-import com.jevinci.fpm.security.jwt.JwtFactory;
-import com.jevinci.fpm.util.JwtUtil;
+import com.jevinci.fpm.security.model.token.TokenFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.authority.AuthorityUtils;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by seongmin Park on 2017. 6. 26..
@@ -22,21 +22,29 @@ import org.springframework.stereotype.Service;
 public class JwtUserDetailsService implements UserDetailsService{
 
     @Autowired
-    UserRepository userRepository;
+    TokenFactory tokenFactory;
 
     @Override
-    public UserDetailsImpl loadUserByUsername(String userId) throws UsernameNotFoundException {
-        User user;
-        if(!userId.equals("GUEST")) {
-            user = userRepository.findOne(userId);
+    public UserDetailsImpl loadUserByUsername(String token) throws UsernameNotFoundException {
+        if(!tokenFactory.verifyToken(token)){
+            throw new BadCredentialsException("Not used JWT");
+        }
+        JWT jwt = tokenFactory.tokenToJwt(token);
 
-            if(user == null){
-                throw new UsernameNotFoundException(String.format("No user found with username '%s'.", userId));
-            }
-        } else {
-            user = new User("GUEST", new String[]{"GUEST"});
+        return convertJwtToUserDetailsImpl(jwt);
+    }
+
+    public UserDetailsImpl convertJwtToUserDetailsImpl(JWT jwt) throws UsernameNotFoundException {
+        List<String> roles = jwt.getClaim("roles").asList(String.class);
+        List<GrantedAuthority> authorities = roles.stream()
+                .map(authority -> new SimpleGrantedAuthority(authority))
+                .collect(Collectors.toList());
+        String email = jwt.getClaim("email").toString();
+
+        if(email == null){
+            throw new UsernameNotFoundException("Not used JWT");
         }
 
-        return new UserDetailsImpl(user, AuthorityUtils.createAuthorityList(user.getRoles()));
+        return new UserDetailsImpl(email ,authorities);
     }
 }

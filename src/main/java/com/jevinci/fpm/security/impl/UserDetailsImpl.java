@@ -12,20 +12,13 @@ import java.util.List;
  */
 public class UserDetailsImpl implements UserDetails{
 
-    private final User user;
+    private final String email;
     private List<GrantedAuthority> authorities;
 
-    public UserDetailsImpl(User user){
-        this.user = user;
-    }
-
-    public UserDetailsImpl(User user, List<GrantedAuthority> authorities){
-        this.user = user;
+    public UserDetailsImpl(String email, List<GrantedAuthority> authorities){
+        this.email = email;
         this.authorities = authorities;
     }
-
-    public User getUser() { return user; }
-
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -39,7 +32,7 @@ public class UserDetailsImpl implements UserDetails{
 
     @Override
     public String getUsername() {
-        return user.getSocialId();
+        return email;
     }
 
     @Override

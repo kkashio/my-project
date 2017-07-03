@@ -1,16 +1,12 @@
 package com.jevinci.fpm.domain;
 
-import com.auth0.jwt.JWT;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import java.util.ArrayList;
-import java.util.Arrays;
+import javax.persistence.*;
 import java.util.Date;
-import java.util.LinkedHashMap;
+import java.util.List;
 
 /**
  * Created by seongmin Park on 2017. 6. 22..
@@ -20,35 +16,47 @@ import java.util.LinkedHashMap;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@Table(name = "USER")
 public class User {
-    @Id
-    private String id;
+    @Id @Column(name="USER_ID")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "SOCIAL_ID")
     private String socialId;
+
+    @Column(name = "EMAIL", nullable = false)
     private String email;
+
+    @Column(name = "PROVIDER")
     private String provider;
+
+    @Column(name = "NICKNAME")
     private String nickname;
+
+    @Column(name = "GENDER")
     private String gender;
-    private String[] roles;
+
+    @OneToMany(fetch = FetchType.EAGER)
+    @JoinColumn(name = "USER_ID", referencedColumnName = "USER_ID")
+    private List<UserRole> roles;
+
+    @Column(name = "REG_DATE", columnDefinition="TIMESTAMP DEFAULT CURRENT_TIMESTAMP", insertable=false, updatable=false)
     private Date regDate;
+
+    @Column(name = "IMAGE_PATH")
     private String imagePath;
+
+    @Column(name = "LAST_LOGIN_DATE")
     private Date lastLoginDate;
+
+    @Column(name = "IS_USED", nullable = false)
     private Boolean isUsed = true;
 
-    public User(String id, String[] roles){
+    public User(Long id, String socialId, String email, List<UserRole> roles){
         this.id = id;
+        this.socialId = socialId;
+        this.email = email;
         this.roles = roles;
-    }
-
-    public User(JWT jwt){
-        this.id = jwt.getClaim("id").toString();
-        this.roles = jwt.getClaim("roles").asArray(String.class);
-    }
-
-    public void setNaverProfile(LinkedHashMap responseMap){
-        email = responseMap.get("email").toString();
-        imagePath = responseMap.get("profile_image").toString();
-        gender = responseMap.get("gender").toString();
-        socialId = responseMap.get("id").toString();
-        provider = "naver";
     }
 }

@@ -1,9 +1,9 @@
 package com.jevinci.fpm.service;
 
+import com.jevinci.fpm.api.naver.NaverApiException;
 import com.jevinci.fpm.api.naver.NaverLoginService;
-import com.jevinci.fpm.dto.SocialLoginResponseDTO;
-import com.jevinci.fpm.domain.User;
-import com.jevinci.fpm.dto.SocialLoginDTO;
+import com.jevinci.fpm.security.auth.rest.LoginResponse;
+import com.jevinci.fpm.security.auth.rest.LoginRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,9 +18,9 @@ public class LoginServiceImpl implements LoginService{
     NaverLoginService naverLoginService;
 
     @Override
-    public SocialLoginResponseDTO socialLogin(SocialLoginDTO socialLoginDTO) {
-        String provider = socialLoginDTO.getProvider();
-        String accessToken = socialLoginDTO.getAccessToken();
+    public LoginResponse socialLogin(LoginRequest loginRequest) {
+        String provider = loginRequest.getProvider();
+        String accessToken = loginRequest.getAccessToken();
 
         switch (provider) {
             case "naver" : return naverLogin(accessToken);
@@ -31,17 +31,21 @@ public class LoginServiceImpl implements LoginService{
     }
 
     @Override
-    public SocialLoginResponseDTO naverLogin(String accessToken) {
-        return naverLoginService.getProfile(accessToken);
+    public LoginResponse naverLogin(String accessToken) {
+        LoginResponse loginResponse = naverLoginService.getProfile(accessToken);
+        if (loginResponse == null){
+            throw new NaverApiException("NAVER API ERROR");
+        }
+        return loginResponse;
     }
 
     @Override
-    public SocialLoginResponseDTO facebookLogin() {
+    public LoginResponse facebookLogin() {
         return null;
     }
 
     @Override
-    public SocialLoginResponseDTO googoleLogin() {
+    public LoginResponse googoleLogin() {
         return null;
     }
 }

@@ -1,4 +1,4 @@
-package com.jevinci.fpm.security;
+package com.jevinci.fpm.security.auth.jwt;
 
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.OrRequestMatcher;

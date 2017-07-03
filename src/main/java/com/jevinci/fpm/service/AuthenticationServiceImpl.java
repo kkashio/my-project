@@ -1,7 +1,7 @@
 package com.jevinci.fpm.service;
 
 import com.jevinci.fpm.domain.User;
-import com.jevinci.fpm.security.jwt.JwtFactory;
+import com.jevinci.fpm.security.model.token.TokenFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,10 +13,10 @@ import org.springframework.stereotype.Service;
 public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Autowired
-    JwtFactory jwtFactory;
+    TokenFactory tokenFactory;
 
     @Override
     public String getToken(User guest) {
-        return jwtFactory.createToken(guest);
+        return tokenFactory.createAccessToken(guest);
     }
 }

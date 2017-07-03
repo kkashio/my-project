@@ -1,40 +1,28 @@
-package com.jevinci.fpm.security.filter;
+package com.jevinci.fpm.security.auth.jwt;
 
-import com.jevinci.fpm.domain.User;
-import com.jevinci.fpm.security.jwt.JwtAuthenticationToken;
-import com.jevinci.fpm.security.jwt.JwtConfig;
-import com.jevinci.fpm.security.jwt.JwtFactory;
-import com.jevinci.fpm.util.JwtUtil;
+import com.jevinci.fpm.security.config.JwtConfig;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.util.matcher.RequestMatcher;
-import org.thymeleaf.util.StringUtils;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.nio.file.AccessDeniedException;
 
 /**
  * Created by seongmin Park on 2017. 6. 26..
+ * Jwt Filter
+ * 받은 Jwt Token 으로 User 정보를 추출하여 Provider로 넘김
  */
 
 @Slf4j
 public class JwtAuthenticationFilter extends AbstractAuthenticationProcessingFilter{
-
-    @Autowired
-    JwtFactory jwtFactory;
-
-    @Autowired
-    JwtUtil jwtUtil;
 
     public JwtAuthenticationFilter(RequestMatcher requestMatcher){
         super(requestMatcher);
@@ -43,22 +31,7 @@ public class JwtAuthenticationFilter extends AbstractAuthenticationProcessingFil
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException, IOException, ServletException {
         String token = request.getHeader(JwtConfig.HEADER_NAME);
-
-        if(!jwtFactory.verifyToken(token)){
-            throw new BadCredentialsException("Not used JWT");
-        }
-
-        User user = new User(jwtUtil.tokenToJwt(token));
-        log.info("checking authentication für user " + user.getId());
-
-        if(user == null)
-            throw new AccessDeniedException("No token");
-
-        if(user != null && SecurityContextHolder.getContext().getAuthentication() == null){
-            return getAuthenticationManager().authenticate(new JwtAuthenticationToken(user));
-        }
-
-        return null;
+        return getAuthenticationManager().authenticate(new JwtAuthenticationToken(token));
     }
 
     @Override
